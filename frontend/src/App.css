@@ -1,0 +1,135 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  font-family: Arial, sans-serif;
+  background: #f3f5f9;
+}
+
+#root {
+  width: 100%;
+}
+
+.app {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 30px 15px;
+}
+
+.card {
+  width: 100%;
+  max-width: 620px;
+  background: white;
+  border-radius: 18px;
+  padding: 32px;
+  box-shadow: 0 10px 35px rgba(0, 0, 0, 0.1);
+}
+
+h1 {
+  text-align: center;
+  margin: 0;
+}
+
+.subtitle {
+  text-align: center;
+  color: #777;
+  margin-bottom: 30px;
+}
+
+button {
+  border: none;
+  border-radius: 10px;
+  padding: 14px 20px;
+  font-size: 16px;
+  cursor: pointer;
+  background: #2563eb;
+  color: white;
+  width: 100%;
+}
+
+button:hover {
+  opacity: 0.9;
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.connect {
+  margin-top: 10px;
+}
+
+.info {
+  background: #f7f8fa;
+  padding: 15px;
+  border-radius: 10px;
+  overflow-wrap: anywhere;
+}
+
+.balances {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+  margin: 20px 0;
+}
+
+.balances div {
+  background: #f7f8fa;
+  border-radius: 12px;
+  padding: 20px;
+  text-align: center;
+}
+
+.balances span {
+  display: block;
+  color: #666;
+  margin-bottom: 8px;
+}
+
+.balances strong {
+  font-size: 20px;
+}
+
+.transfer {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.transfer label {
+  font-weight: bold;
+}
+
+.transfer input {
+  width: 100%;
+  padding: 14px;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  font-size: 16px;
+}
+
+.status {
+  margin-top: 20px;
+  padding: 15px;
+  background: #eef4ff;
+  border-radius: 10px;
+  text-align: center;
+  font-weight: bold;
+}
+
+@media (max-width: 600px) {
+  .card {
+    padding: 20px;
+  }
+
+  .balances {
+    grid-template-columns: 1fr;
+  }
+}

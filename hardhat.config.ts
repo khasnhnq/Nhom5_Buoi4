@@ -3,6 +3,7 @@ import { configVariable, defineConfig } from "hardhat/config";
 
 export default defineConfig({
   plugins: [hardhatToolboxMochaEthersPlugin],
+
   solidity: {
     profiles: {
       default: {
@@ -19,15 +20,32 @@ export default defineConfig({
       },
     },
   },
+
   networks: {
     hardhatMainnet: {
       type: "edr-simulated",
       chainType: "l1",
     },
+
     hardhatOp: {
       type: "edr-simulated",
       chainType: "op",
     },
+
+    // Chain A - Source
+    chainA: {
+      type: "http",
+      chainType: "l1",
+      url: "http://127.0.0.1:8547",
+    },
+
+    // Chain B - Destination
+    chainB: {
+      type: "http",
+      chainType: "l1",
+      url: "http://127.0.0.1:8548",
+    },
+
     sepolia: {
       type: "http",
       chainType: "l1",

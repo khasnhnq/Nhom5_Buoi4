@@ -25,36 +25,37 @@ contract SourceBridge is Ownable {
 
     error InvalidAmount();
 
-    function lock(
-        address to,
-        uint256 amount,
-        uint256 destChainId
-    ) external {
-        if (amount == 0 || to == address(0)) revert InvalidAmount();
+    function lock(address to, uint256 amount, uint256 destChainId) external {
+    // 1. KIEM TRA dau vao
+    if (amount == 0 || to == address(0)) revert InvalidAmount();
 
-        token.safeTransferFrom(msg.sender, address(this), amount);
+    // Tang nonce
+    unchecked {
+        nonce++;
+    }
 
-        bytes32 messageId = keccak256(
-            abi.encode(
-                block.chainid,
-                destChainId,
-                msg.sender,
-                to,
-                amount,
-                nonce
-            )
-        );
+    // 2. KEO TOKEN ve giu
+    token.safeTransferFrom(msg.sender, address(this), amount);
 
-        emit TokensLocked(
-            messageId,
+    // 3. TAO ma thong diep duy nhat
+    bytes32 messageId = keccak256(
+        abi.encode(
+            block.chainid,
+            destChainId,
             msg.sender,
             to,
             amount,
-            destChainId
-        );
+            nonce
+        )
+    );
 
-        unchecked {
-            nonce++;
-        }
-    }
+    // 4. BAO RA NGOAI
+    emit TokensLocked(
+        messageId,
+        msg.sender,
+        to,
+        amount,
+        destChainId
+    );
+}
 }

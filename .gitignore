@@ -1,35 +1,81 @@
+# ========================================
 # Node modules
-/node_modules
+# ========================================
+/node_modules/
+/frontend/node_modules/
 
-# Compilation output
-/dist
+# ========================================
+# Build / Compilation output
+# ========================================
+/dist/
+/frontend/dist/
+/bundle/
 
-# pnpm deploy output
-/bundle
-
+# ========================================
 # Hardhat Build Artifacts
-/artifacts
+# ========================================
+/artifacts/
+/cache/
+/types/
 
-# Hardhat compilation (v2) support directory
-/cache
-
-# Typechain output
-/types
-
+# ========================================
 # Environment files
+# KHONG push private key len GitHub
+# ========================================
 .env
 .env.*
 !.env.example
 
-# Hardhat coverage reports
-/coverage
+# Frontend environment files
+/frontend/.env
+/frontend/.env.*
+!/frontend/.env.example
 
-# Gas snapshot files
+# ========================================
+# Hardhat coverage
+# ========================================
+/coverage/
+
+# ========================================
+# Gas snapshot
+# ========================================
 /.gas-snapshot
 
-# Snapshot cheatcodes output
-/snapshots
+# ========================================
+# Snapshot cheatcodes
+# ========================================
+/snapshots/
 
+# ========================================
+# Logs
+# ========================================
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# ========================================
+# Editor / IDE
+# ========================================
+.vscode/
+.idea/
+
+# ========================================
+# OS files
+# ========================================
+.DS_Store
+Thumbs.db
+
+# ========================================
+# Temporary files
+# ========================================
+*.tmp
+*.temp
+
+# ========================================
+# AI / Agent files
+# ========================================
 .agents/
 .claude/
 AGENTS.md

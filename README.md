@@ -1,57 +1,194 @@
-# Sample Hardhat 3 Project (`mocha` and `ethers`)
+# Cross-Chain Bridge - MSSV 104087
 
-This project showcases a Hardhat 3 project using `mocha` for tests and the `ethers` library for Ethereum interactions.
+## 1. Cài đặt
 
-To learn more about Hardhat 3, please visit the [Getting Started guide](https://hardhat.org/docs/getting-started#getting-started-with-hardhat-3). To share your feedback, join our [Hardhat 3](https://hardhat.org/hardhat3-telegram-group) Telegram group or [open an issue](https://github.com/NomicFoundation/hardhat/issues/new) in our GitHub issue tracker.
+Clone project và cài dependencies:
 
-## Project Overview
+```bash
+npm install
+```
 
-This example project includes:
+Build smart contract:
 
-- A simple Hardhat configuration file.
-- Foundry-compatible Solidity unit tests.
-- TypeScript integration tests using `mocha` and ethers.js
-- Examples demonstrating how to connect to different types of networks, including locally simulating OP mainnet.
+```bash
+npx hardhat build
+```
 
-## Usage
+---
 
-### Running Tests
+## 2. Khởi động Chain A
 
-To run all the tests in the project, execute the following command:
+Mở Terminal 1:
 
-```shell
+```bash
+npx hardhat node --port 8547
+```
+
+Giữ terminal này chạy.
+
+Chain A:
+
+- RPC: http://127.0.0.1:8547
+- Chain ID: 31337
+
+---
+
+## 3. Khởi động Chain B
+
+Mở Terminal 2:
+
+```bash
+npx hardhat node --port 8548 --config hardhat.config.chainB.ts
+```
+
+Giữ terminal này chạy.
+
+Chain B:
+
+- RPC: http://127.0.0.1:8548
+- Chain ID: 31338
+
+---
+
+## 4. Deploy contract lên hai chain
+
+Mở Terminal 3:
+
+```bash
+npx hardhat run scripts/deploy-two-chains.ts
+```
+
+Sau khi deploy thành công, địa chỉ contract được lưu trong:
+
+```text
+deployed.json
+```
+
+File này chứa địa chỉ:
+
+- MyToken
+- SourceBridge
+- WrappedToken
+- DestinationBridge
+- Relayer
+
+---
+
+## 5. Cấu hình Relayer
+
+Tạo file `.env` dựa trên:
+
+```text
+.env.example
+```
+
+Điền RPC của Chain A, Chain B, địa chỉ contract và private key của relayer.
+
+Không commit file `.env` lên GitHub.
+
+---
+
+## 6. Chạy Relayer
+
+Mở Terminal 3 hoặc một terminal mới:
+
+```bash
+npx tsx relayer/relayer.ts
+```
+
+Khi chạy thành công sẽ xuất hiện:
+
+```text
+Dang cho event TokensLocked...
+```
+
+Giữ terminal này chạy.
+
+---
+
+## 7. Lock 100 TLB trên Chain A
+
+Mở Terminal 4:
+
+```bash
+npx tsx scripts/lock-100.ts
+```
+
+Kết quả mong đợi:
+
+```text
+Lock thanh cong!
+So luong: 100.0 TLB
+Destination Chain ID: 31338
+```
+
+Relayer sẽ nhận sự kiện `TokensLocked` và mint wrapped token trên Chain B.
+
+Kết quả ở terminal Relayer:
+
+```text
+Dang mint wTLB tren Chain B...
+Mint thanh cong: 100.0 wTLB
+```
+
+---
+
+## 8. Kiểm tra số dư trên Chain B
+
+Chạy:
+
+```bash
+npx tsx scripts/check-balance.ts
+```
+
+Kết quả mong đợi:
+
+```text
+So du: 100.0 wTLB
+```
+
+Điều này chứng minh 100 TLB đã được lock trên Chain A và 100 wTLB đã được mint trên Chain B.
+
+---
+
+## 9. Chạy test
+
+Chạy:
+
+```bash
 npx hardhat test
 ```
 
-You can also selectively run the Solidity or `mocha` tests:
+Các test của `DestinationBridge` kiểm tra:
 
-```shell
-npx hardhat test solidity
-npx hardhat test mocha
+- Relayer có thể mint token.
+- Người không phải relayer bị chặn (`NotRelayer`).
+- Một `messageId` không thể xử lý hai lần (`AlreadyProcessed`).
+
+Tất cả test phải ở trạng thái `passing`.
+
+---
+
+## Thứ tự chạy
+
+```text
+1. npm install
+2. npx hardhat build
+3. Khởi động Chain A - port 8547
+4. Khởi động Chain B - port 8548
+5. Deploy contract lên hai chain
+6. Cấu hình .env
+7. Chạy Relayer
+8. Chạy scripts/lock-100.ts
+9. Chạy scripts/check-balance.ts
+10. Chạy npx hardhat test
 ```
 
-### Make a deployment to Sepolia
+## Các terminal cần giữ chạy
 
-This project includes an example Ignition module to deploy the contract. You can deploy this module to a locally simulated chain or to Sepolia.
-
-To run the deployment to a local chain:
-
-```shell
-npx hardhat ignition deploy ignition/modules/Counter.ts
-```
-
-To run the deployment to Sepolia, you need an account with funds to send the transaction. The provided Hardhat configuration includes a Configuration Variable called `SEPOLIA_PRIVATE_KEY`, which you can use to set the private key of the account you want to use.
-
-You can set the `SEPOLIA_PRIVATE_KEY` variable using the `hardhat-keystore` plugin or by setting it as an environment variable.
-
-To set the `SEPOLIA_PRIVATE_KEY` config variable using `hardhat-keystore`:
-
-```shell
-npx hardhat keystore set SEPOLIA_PRIVATE_KEY
-```
-
-After setting the variable, you can run the deployment with the Sepolia network:
-
-```shell
-npx hardhat ignition deploy --network sepolia ignition/modules/Counter.ts
+```text
+Terminal 1: Chain A (8547)
+Terminal 2: Chain B (8548)
+Terminal 3: Relayer
+Terminal 4: Dùng để lock token và kiểm tra balance
 ```
