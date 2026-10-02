@@ -2,7 +2,7 @@
 
 ## 1. Cài đặt
 
-Clone project và cài dependencies:
+Cài đặt package cho project:
 
 ```bash
 npm install
@@ -14,26 +14,34 @@ Build smart contract:
 npx hardhat build
 ```
 
+Cài đặt frontend:
+
+```bash
+cd frontend
+npm install
+cd ..
+```
+
 ---
 
-## 2. Khởi động Chain A
+## 2. Chạy Chain A
 
-Mở Terminal 1:
+Mở Terminal 1 tại thư mục gốc project:
 
 ```bash
 npx hardhat node --port 8547
 ```
 
-Giữ terminal này chạy.
-
-Chain A:
+Thông tin Chain A:
 
 - RPC: http://127.0.0.1:8547
 - Chain ID: 31337
 
+Giữ Terminal 1 chạy.
+
 ---
 
-## 3. Khởi động Chain B
+## 3. Chạy Chain B
 
 Mở Terminal 2:
 
@@ -41,154 +49,189 @@ Mở Terminal 2:
 npx hardhat node --port 8548 --config hardhat.config.chainB.ts
 ```
 
-Giữ terminal này chạy.
-
-Chain B:
+Thông tin Chain B:
 
 - RPC: http://127.0.0.1:8548
 - Chain ID: 31338
 
+Giữ Terminal 2 chạy.
+
 ---
 
-## 4. Deploy contract lên hai chain
+## 4. Deploy contract
 
-Mở Terminal 3:
+Sau khi Chain A và Chain B đã chạy, mở một terminal mới:
 
 ```bash
 npx hardhat run scripts/deploy-two-chains.ts
 ```
 
-Sau khi deploy thành công, địa chỉ contract được lưu trong:
+Sau khi deploy, địa chỉ các contract được lưu trong:
 
 ```text
 deployed.json
 ```
 
-File này chứa địa chỉ:
+Nếu địa chỉ contract thay đổi sau khi deploy lại, cập nhật địa chỉ tương ứng trong:
 
-- MyToken
-- SourceBridge
-- WrappedToken
-- DestinationBridge
-- Relayer
+```text
+frontend/src/config.ts
+```
 
 ---
 
 ## 5. Cấu hình Relayer
 
-Tạo file `.env` dựa trên:
+Tạo file `.env` dựa trên `.env.example`.
 
-```text
-.env.example
+Ví dụ:
+
+```env
+RPC_A=http://127.0.0.1:8547
+RPC_B=http://127.0.0.1:8548
+
+SOURCE_BRIDGE=<SOURCE_BRIDGE_ADDRESS>
+DEST_BRIDGE=<DESTINATION_BRIDGE_ADDRESS>
+
+RELAYER_PRIVATE_KEY=<RELAYER_PRIVATE_KEY>
 ```
 
-Điền RPC của Chain A, Chain B, địa chỉ contract và private key của relayer.
-
-Không commit file `.env` lên GitHub.
+Không đưa file `.env` chứa private key thật lên GitHub.
 
 ---
 
 ## 6. Chạy Relayer
 
-Mở Terminal 3 hoặc một terminal mới:
+Mở Terminal 3:
 
 ```bash
-npx tsx relayer/relayer.ts
+node relayer/index.js
 ```
 
 Khi chạy thành công sẽ xuất hiện:
 
 ```text
+RELAYER MSSV 104087 DANG CHAY
+BAT DAU QUET BU EVENT CU
+QUET BU HOAN TAT
 Dang cho event TokensLocked...
 ```
 
-Giữ terminal này chạy.
+Giữ Terminal 3 chạy.
 
 ---
 
-## 7. Lock 100 TLB trên Chain A
+## 7. Chạy Frontend
 
 Mở Terminal 4:
 
 ```bash
-npx tsx scripts/lock-100.ts
+cd frontend
+npm run dev
 ```
 
-Kết quả mong đợi:
+Sau đó mở trình duyệt tại:
 
 ```text
-Lock thanh cong!
-So luong: 100.0 TLB
-Destination Chain ID: 31338
+http://localhost:5173/
 ```
 
-Relayer sẽ nhận sự kiện `TokensLocked` và mint wrapped token trên Chain B.
-
-Kết quả ở terminal Relayer:
-
-```text
-Dang mint wTLB tren Chain B...
-Mint thanh cong: 100.0 wTLB
-```
+Giữ Terminal 4 chạy.
 
 ---
 
-## 8. Kiểm tra số dư trên Chain B
+## 8. Cấu hình MetaMask
 
-Chạy:
+Thêm mạng Chain A vào MetaMask:
 
-```bash
-npx tsx scripts/check-balance.ts
-```
+- Network Name: Chuoi A (local)
+- RPC URL: http://127.0.0.1:8547
+- Chain ID: 31337
+- Currency Symbol: ETH
 
-Kết quả mong đợi:
+Import Account #0 của Hardhat bằng private key được hiển thị khi chạy Chain A.
 
-```text
-So du: 100.0 wTLB
-```
-
-Điều này chứng minh 100 TLB đã được lock trên Chain A và 100 wTLB đã được mint trên Chain B.
+Chỉ sử dụng tài khoản Hardhat local cho mục đích học tập.
 
 ---
 
-## 9. Chạy test
+## 9. Chuyển token từ Chain A sang Chain B
 
-Chạy:
+Trên giao diện web:
 
-```bash
-npx hardhat test
+1. Bấm `Ket noi vi`.
+2. Cho phép MetaMask kết nối.
+3. Kiểm tra địa chỉ ví và số dư TLB.
+4. Nhập số lượng token cần chuyển.
+5. Bấm `Chuyen sang chuoi B`.
+6. Xác nhận giao dịch `Approve` trên MetaMask.
+7. Xác nhận giao dịch `Lock` trên MetaMask.
+8. Chờ Relayer xử lý.
+9. Khi thành công, giao diện hiển thị:
+
+```text
+Hoan tat! Token da co o chuoi B.
 ```
 
-Các test của `DestinationBridge` kiểm tra:
+Sau khi hoàn tất:
 
-- Relayer có thể mint token.
-- Người không phải relayer bị chặn (`NotRelayer`).
-- Một `messageId` không thể xử lý hai lần (`AlreadyProcessed`).
-
-Tất cả test phải ở trạng thái `passing`.
+- Số dư TLB trên Chain A giảm.
+- Số dư wTLB trên Chain B tăng.
 
 ---
 
-## Thứ tự chạy
+## 10. Thứ tự chạy đầy đủ
+
+Hệ thống cần 5 thành phần hoạt động:
 
 ```text
-1. npm install
-2. npx hardhat build
-3. Khởi động Chain A - port 8547
-4. Khởi động Chain B - port 8548
-5. Deploy contract lên hai chain
-6. Cấu hình .env
-7. Chạy Relayer
-8. Chạy scripts/lock-100.ts
-9. Chạy scripts/check-balance.ts
-10. Chạy npx hardhat test
+1. Chain A
+2. Chain B
+3. Relayer
+4. React Frontend
+5. MetaMask trên Chain A
 ```
 
-## Các terminal cần giữ chạy
+Thứ tự thực hiện:
 
 ```text
-Terminal 1: Chain A (8547)
-Terminal 2: Chain B (8548)
+Chain A
+   ↓
+Chain B
+   ↓
+Deploy Contracts
+   ↓
+Relayer
+   ↓
+React Frontend
+   ↓
+MetaMask
+   ↓
+Chuyển token
+```
+
+Các terminal cần giữ:
+
+```text
+Terminal 1: Chain A - port 8547
+Terminal 2: Chain B - port 8548
 Terminal 3: Relayer
-Terminal 4: Dùng để lock token và kiểm tra balance
+Terminal 4: React/Vite Frontend
+MetaMask:   Chuoi A (local)
 ```
+
+---
+
+## 11. Xử lý lỗi người dùng hủy giao dịch
+
+Nếu người dùng bấm Reject/Cancel trên MetaMask, giao diện sẽ hiển thị:
+
+```text
+Ban da huy giao dich.
+```
+
+---
+
+## Tác giả
+
+MSSV: 104087
